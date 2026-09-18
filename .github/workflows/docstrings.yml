@@ -1,0 +1,17 @@
+name: docs
+
+# Second gate, alongside the release gate: "the code is documented" is checked
+# rather than asserted. Every module, class and function needs a docstring, and
+# nested helpers are not exempt.
+on:
+  push:
+  pull_request:
+
+jobs:
+  docstrings:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check docstring coverage
+        run: python3 tools/doc_coverage.py

@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use this index, its data or its code, please cite it as below."
+title: "fact-provenance: an open index of where web claims come from"
+abstract: >-
+  A small, searchable index of factual claims taken from public sources, where
+  every claim keeps a return address: the page it came from, the sentence around
+  it, a digest of that page, when the page was first seen, and — where the page
+  cited a source of its own next to that sentence — the URL it cited. Records are
+  served as W3C PROV-O over JSON-LD. It does not judge whether a claim is true;
+  it makes the claim checkable.
+authors:
+  - name: "Fact Provenance maintainers"
+repository-code: "https://github.com/vimes1984/fact-provenance"
+url: "https://factprovenance.org"
+license: MIT
+version: 0.1.0
+date-released: 2026-09-18
+keywords:
+  - provenance
+  - PROV-O
+  - JSON-LD
+  - linked-data
+  - claim-extraction
+  - fact-checking
+  - open-data
+  - transparency
+  - SQLite
+  - FTS5
+  - Python
+type: software

@@ -44,6 +44,7 @@ def fts_query(q: str) -> str:
 
 
 def connect():
+    """A read-only connection: the server is a reader and never a writer."""
     return sqlite3.connect(f"file:{DB}?mode=ro", uri=True, timeout=10)
 
 
@@ -109,6 +110,12 @@ def claim_html(rec: dict) -> str:
 
 
 def prov_record(row) -> dict:
+    """Wrap one database row as a PROV-O / JSON-LD record.
+
+    Nothing here is a judgement about truth: `fp:verificationStatus` is
+    `unverified`, and the cited source is labelled as the page's own citation,
+    because a pointer we did not follow is not a verification we performed.
+    """
     (cid, text, kind, url, domain, title, pubdate, digest, cited, ctx, fetched) = row
     rec = {
         "@context": NS,
@@ -130,7 +137,7 @@ def prov_record(row) -> dict:
         "prov:wasGeneratedBy": {
             "@type": "prov:Activity",
             "fp:method": "regex-extract",
-            "fp:agent": "hermes-owl",
+            "fp:agent": "fp-extractor/0.1",
         },
         "dct:created": fetched,
     }
@@ -144,12 +151,25 @@ def prov_record(row) -> dict:
 
 
 class Handler(BaseHTTPRequestHandler):
+    """Read-only HTTP surface: the search UI, three JSON routes, PROV-O records.
+
+    Content negotiation is per route: `/claim/<id>` answers HTML for a browser
+    and application/ld+json for a data client, so the identifier quoted in a
+    record is one a person can also open in a tab.
+    """
+
     server_version = "FactProvUI/0.1"
 
     def log_message(self, fmt, *args):
+        """Stay quiet per request: the access log belongs to the front proxy."""
         pass  # quiet
 
     def _send(self, code, body: bytes, ctype="application/json; charset=utf-8"):
+        """Write one complete response with the headers this API always wants.
+
+        `no-store`, because the index moves under the reader, and a permissive
+        CORS header so a third-party page can cite a record directly.
+        """
         self.send_response(code)
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(body)))
@@ -159,6 +179,7 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def _json(self, obj, code=200):
+        """JSON response, pretty-printed: this API is read by people as often as by code."""
         self._send(code, json.dumps(obj, ensure_ascii=False, indent=2).encode())
 
     def _file(self, path, ctype, code=200):
@@ -170,6 +191,7 @@ class Handler(BaseHTTPRequestHandler):
             self._send(404, b"page not deployed", "text/plain; charset=utf-8")
 
     def do_GET(self):
+        """Route one GET. Known paths are explicit; everything else lands on the UI."""
         u = urllib.parse.urlparse(self.path)
         qs = urllib.parse.parse_qs(u.query)
         path = u.path
@@ -213,6 +235,7 @@ class Handler(BaseHTTPRequestHandler):
             self._json({"error": str(e)[:200]}, 500)
 
     def stats(self):
+        """Counts for /api/stats: what is in the index and how far behind it is."""
         con = connect()
         c = con.execute
         return {
@@ -226,12 +249,18 @@ class Handler(BaseHTTPRequestHandler):
         }
 
     def domains(self):
+        """Every domain in the index with its claim count, biggest first."""
         con = connect()
         rows = con.execute("SELECT domain, count(*) c FROM claims GROUP BY domain ORDER BY c DESC"
                            ).fetchall()
         return {"domains": [{"domain": d, "claims": n} for d, n in rows]}
 
     def search(self, qs):
+        """Full-text search over claims, with optional kind and domain filters.
+
+        The query is escaped into an FTS5 MATCH expression, capped at 100 rows
+        per page, and returns a total so a client can paginate honestly.
+        """
         q = (qs.get("q") or [""])[0]
         kind = (qs.get("kind") or [""])[0]
         domain = (qs.get("domain") or [""])[0]
@@ -272,6 +301,7 @@ class Handler(BaseHTTPRequestHandler):
                 } for r in rows]}
 
     def claim(self, cid):
+        """One claim by id, as a PROV-O record (or an error object, never a 500)."""
         if not cid.isdigit():
             return {"error": "bad id"}
         con = connect()
@@ -283,6 +313,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
+    """Parse arguments and serve until interrupted."""
     ap = argparse.ArgumentParser()
     ap.add_argument("--db", default=DB)
     ap.add_argument("--port", type=int, default=8095)

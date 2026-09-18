@@ -58,6 +58,7 @@ TITLE_RE = re.compile(r"(?is)<title[^>]*>(.*?)</title>")
 
 
 def fetch(url: str, timeout: int = 25):
+    """Fetch a URL politely: identifying user-agent, 6 MB ceiling, no retries."""
     req = urllib.request.Request(url, headers={
         "User-Agent": UA,
         "Accept": "text/html,application/xhtml+xml",
@@ -73,6 +74,13 @@ _ROBOTS: dict[str, urllib.robotparser.RobotFileParser] = {}
 
 
 def robots_ok(url: str) -> bool:
+    """Whether our user-agent may fetch this URL, per the host's robots.txt.
+
+    One parser is cached per host for the life of the run. An unreachable
+    robots.txt is read as permission — the polite reading — and the fallback is
+    printed rather than swallowed, because a silent default is what makes a
+    crawler rude by accident.
+    """
     p = urllib.parse.urlparse(url)
     base = f"{p.scheme}://{p.netloc}"
     rp = _ROBOTS.get(base)
@@ -147,6 +155,7 @@ def cc_get_record(rec: dict) -> bytes:
 def to_text_with_refs(h: str) -> str:
     """HTML -> text, keeping <sup class=reference> hrefs as [[REF:url]] markers."""
     def marker(m):
+        """Replace one reference <sup> with a [[REF:url]] marker in the text."""
         href = re.search(r'href="([^"]+)"', m.group(0))
         return f" [[REF:{html.unescape(href.group(1))}]]" if href else " [[REF:]]"
     h = REF_RE.sub(marker, h)
@@ -160,6 +169,11 @@ def to_text_with_refs(h: str) -> str:
 
 
 def meta_date(h: str):
+    """The publication date the page declares for itself, or None.
+
+    Declared, not inferred: `pubdate` is the page's own claim about itself, which
+    is why the README is careful to say it is not when the event happened.
+    """
     for rx in META_DATE:
         m = rx.search(h)
         if m:
@@ -170,6 +184,14 @@ def meta_date(h: str):
 
 
 def claims_from_page(raw: bytes, url: str, max_claims: int = 300):
+    """Extract candidate claims from one fetched page.
+
+    Rows carry the sentence, its kinds, the page, the page digest, any date the
+    page declared, and any citation the page itself printed next to the
+    sentence. Extraction is regex over sentence shape — quantity, measure, dated
+    statement, attribution, superlative — with no model of negation, tense,
+    hedging, or of whether the sentence is about this world at all.
+    """
     h = raw.decode("utf-8", "replace")
     title = ""
     m = TITLE_RE.search(h)
@@ -235,6 +257,13 @@ CREATE TABLE IF NOT EXISTS pages (
 
 
 def main():
+    """Run the rails named on the command line against one database.
+
+    `--urls` fetches politely; `--cc-domains` reads the same pages out of the
+    Common Crawl archive instead of crawling live; `--warc-csv` ingests rows
+    from a sibling tool. The schema is created when absent, so pointing this at
+    a new path is all it takes to start a fresh index.
+    """
     ap = argparse.ArgumentParser()
     ap.add_argument("--urls")
     ap.add_argument("--cc-domains", help="file of domains to mine from the Common Crawl archive")

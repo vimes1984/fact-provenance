@@ -118,6 +118,12 @@ def read_text(path: pathlib.Path) -> tuple[str | None, str | None]:
 
 
 def scan(path: pathlib.Path) -> tuple[list[tuple[int, str, str]], str | None]:
+    """Every marker in one file, as (line number, marker, excerpt) triples.
+
+    An unreadable file returns no hits and a reason: a binary that cannot be
+    certified as text must be reported UNSCANNED and fail the build, because
+    "could not read it" is not "clean".
+    """
     text, why = read_text(path)
     if text is None:
         return [], why
@@ -148,6 +154,11 @@ def self_test() -> int:
 
 
 def main(argv: list[str]) -> int:
+    """Run the self-test, or scan the tree / explicit paths, and report.
+
+    Exit status is the interface: 0 only when every file git tracks was readable
+    and marker-free. Anything else means do not publish.
+    """
     args = argv[1:]
     if args and args[0] == "--self-test":
         return self_test()

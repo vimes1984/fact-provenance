@@ -53,6 +53,12 @@ window.fetch = async function (url) {
 
 
 def main():
+    """Write the single-file export and report what went into it.
+
+    With `--allow-domains` the licence gate runs first and the count of withheld
+    claims is printed, so a build that quietly dropped data cannot happen: the
+    withholding is on the record.
+    """
     ap = argparse.ArgumentParser()
     ap.add_argument("--db", default=os.path.join(HERE, "provenance.db"))
     ap.add_argument("--out", default=os.path.join(HERE, "dist", "fact-provenance.html"))
