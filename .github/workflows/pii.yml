@@ -1,0 +1,21 @@
+name: pii-guard
+
+# Release gate: nothing internal may reach the public build.
+# Runs on every push and every pull request, and refuses the change if any
+# tracked file carries an internal marker (or is a binary that cannot be
+# certified as text at all).
+on:
+  push:
+  pull_request:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prove the guard can fail
+        run: python3 tools/pii_scan.py --self-test
+
+      - name: Scan tracked files for internal markers
+        run: python3 tools/pii_scan.py

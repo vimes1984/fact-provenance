@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fact Provenance — strategic plan v1.1</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* Project tokens — same set the register itself uses */
+  :root{
+    --bg:#0d1117; --panel:#010409; --panel2:#161b22; --line:#30363d; --line2:#21262d;
+    --ink:#e6edf3; --muted:#8b949e; --dim:#6e7681;
+    --accent:#4a84fe; --ok:#3fb950; --warn:#d29922; --bad:#f85149;
+    --sans:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+       font-size:15.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+  a:hover{border-bottom-color:var(--accent);color:#fff}
+  a:focus{outline:2px solid var(--accent);outline-offset:2px}
+  code{font-family:var(--mono);font-size:.87em;background:var(--panel2);
+       border:1px solid var(--line);padding:1px 5px;color:#c9d1d9}
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+  .top{position:sticky;top:0;z-index:20;background:rgba(1,4,9,.92);
+       backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+       display:flex;align-items:center;gap:16px;padding:0 20px;height:52px}
+  .top .mark{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.01em}
+  .top .mark svg{display:block}
+  .top .ver{font-family:var(--mono);font-size:11px;color:var(--dim);border:1px solid var(--line);
+            padding:2px 7px;letter-spacing:.04em}
+  .top .spacer{flex:1}
+  .top .links{display:flex;gap:18px;font-size:13px;color:var(--muted)}
+  .top .links a{border:0;color:var(--muted)}
+  .top .links a:hover{color:var(--ink)}
+
+  .shell{display:grid;grid-template-columns:248px minmax(0,1fr);align-items:start;
+         max-width:1560px;margin:0 auto}
+  nav.side{position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;
+           border-right:1px solid var(--line);padding:24px 0 40px}
+  nav.side .grp{padding:0 20px 14px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+  nav.side a{display:flex;gap:10px;align-items:baseline;padding:6px 20px;border:0;
+             font-size:13.5px;color:var(--muted);border-left:2px solid transparent}
+  nav.side a:hover{color:var(--ink);background:var(--panel2)}
+  nav.side a.on{color:var(--ink);border-left-color:var(--accent);background:#0b1220}
+  nav.side a .i{font-family:var(--mono);font-size:10.5px;color:var(--dim);min-width:16px}
+  nav.side a.on .i{color:var(--accent)}
+  nav.side .foot{margin:22px 20px 0;padding-top:16px;border-top:1px solid var(--line);
+                 font-size:12px;color:var(--dim);line-height:1.7}
+  .dot{display:inline-block;width:7px;height:7px;margin-right:7px;vertical-align:middle;position:relative;top:-1px}
+  .ok{background:var(--ok)} .warn{background:var(--warn)} .bad{background:var(--bad)}
+  .info{background:var(--accent)} .grey{background:var(--dim)}
+
+  main{padding:0 0 80px}
+  header.hero{padding:56px 38px 34px;border-bottom:1px solid var(--line)}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+           color:var(--accent);margin-bottom:18px}
+  h1{margin:0;font-size:52px;line-height:1.06;letter-spacing:-.028em;font-weight:700;max-width:20ch}
+  h1 em{font-style:normal;color:var(--accent)}
+  .hero .sub{margin:20px 0 0;max-width:74ch;font-size:17.5px;color:#c9d1d9}
+  .hero .sub b{color:#fff;font-weight:600}
+
+  .strip{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line)}
+  .strip div{padding:20px 22px;border-right:1px solid var(--line)}
+  .strip div:last-child{border-right:0}
+  .strip .k{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
+  .strip .v{font-family:var(--mono);font-size:27px;font-weight:500;margin-top:8px;letter-spacing:-.02em}
+  .strip .v.a{color:var(--accent)} .strip .v.b{color:var(--bad)}
+  .strip .m{font-size:12px;color:var(--muted);margin-top:3px}
+
+  section{padding:44px 38px 8px;border-bottom:1px solid var(--line);scroll-margin-top:52px}
+  section:last-of-type{border-bottom:0}
+  h2{margin:0 0 6px;font-size:27px;letter-spacing:-.02em;font-weight:650;display:flex;gap:14px;align-items:baseline}
+  h2 .n{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.06em;
+        border:1px solid var(--line);padding:2px 6px;position:relative;top:-3px}
+  h3{margin:30px 0 4px;font-size:16.5px;letter-spacing:-.01em;font-weight:600}
+  h4{margin:22px 0 4px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600}
+  p{margin:11px 0;max-width:82ch}
+  ul,ol{margin:11px 0 11px 18px;padding:0;max-width:82ch}
+  li{margin:6px 0}
+  .lede{font-size:17px;color:#c9d1d9;max-width:80ch}
+
+  table{width:100%;border-collapse:collapse;margin:20px 0;font-size:14px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line2);vertical-align:top}
+  thead th{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);
+           border-bottom:1px solid var(--line);white-space:nowrap}
+  tbody tr:hover{background:#0b1220}
+  td:first-child{color:#fff}
+  td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;color:#c9d1d9}
+
+  .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:20px 0}
+  .cards.four{grid-template-columns:repeat(4,1fr)}
+  .card{background:var(--panel2);border:1px solid var(--line);padding:16px 18px}
+  .card .k{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
+  .card .t{margin-top:8px;font-weight:600;font-size:15.5px}
+  .card p{margin:6px 0 0;font-size:13.5px;color:var(--muted);max-width:none}
+  .callout{border-left:2px solid var(--accent);background:var(--panel2);padding:16px 20px;margin:22px 0}
+  .callout.warn{border-left-color:var(--warn)}
+  .callout.bad{border-left-color:var(--bad)}
+  .callout p{margin:6px 0}
+  .callout p:last-child{margin-bottom:0}
+  .callout .h{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+
+  .phase{display:grid;grid-template-columns:150px minmax(0,1fr);border-top:1px solid var(--line2)}
+  .phase:last-child{border-bottom:1px solid var(--line2)}
+  .phase .when{padding:18px 16px 18px 0;color:var(--muted);font-size:12.5px;line-height:1.7}
+  .phase .when .st{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;margin-top:4px}
+  .phase .what{padding:18px 0 20px 22px;border-left:1px solid var(--line2)}
+  .phase .what h3{margin:0 0 6px;font-size:17px}
+  .phase .what p{margin:6px 0 0;font-size:14px;color:#c9d1d9}
+
+  blockquote{margin:26px 0;padding:0 0 0 20px;border-left:2px solid var(--accent);
+             font-size:18px;line-height:1.5;color:#fff;max-width:74ch}
+  footer{padding:30px 38px 70px;color:var(--dim);font-size:12.5px;line-height:1.8;max-width:100ch}
+  footer .files{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:14px}
+
+  @media (max-width:1100px){
+    .shell{grid-template-columns:1fr}
+    nav.side{display:none}
+    .strip{grid-template-columns:repeat(2,1fr)}
+    .cards,.cards.four{grid-template-columns:1fr}
+    h1{font-size:38px}
+  }
+  @media (max-width:640px){
+    header.hero,section,footer{padding-left:18px;padding-right:18px}
+    .strip div{padding:16px 18px}
+    .phase{grid-template-columns:1fr}
+    .phase .what{border-left:0;padding-left:0}
+    h1{font-size:31px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="mark">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path d="M2 10h4.2M13.8 10H18" stroke="#4a84fe" stroke-width="1.2"/>
+      <circle cx="10" cy="10" r="3.4" stroke="#e6edf3" stroke-width="1.4"/>
+      <path d="M10 4.2V2M10 18v-2.2" stroke="#30363d" stroke-width="1.2"/>
+    </svg>
+    Fact Provenance
+  </div>
+  <span class="ver">PLAN v1.1</span>
+  <div class="spacer"></div>
+  <div class="links"><span>external &middot; public build</span><a href="/">index</a><a href="#next">next actions</a></div>
+</div>
+
+<div class="shell">
+<nav class="side">
+  <div class="grp">Contents</div>
+  <a href="#thesis"><span class="i">01</span>Thesis</a>
+  <a href="#why"><span class="i">02</span>Why it hurts everyone</a>
+  <a href="#origin"><span class="i">03</span>Origin &amp; propagation</a>
+  <a href="#product"><span class="i">04</span>The product</a>
+  <a href="#state"><span class="i">05</span>Where it stands</a>
+  <a href="#arch"><span class="i">06</span>Architecture</a>
+  <a href="#crypto"><span class="i">07</span>Cryptographic identity</a>
+  <a href="#law"><span class="i">08</span>Blame, done responsibly</a>
+  <a href="#licence"><span class="i">09</span>Licensing &amp; legal</a>
+  <a href="#dist"><span class="i">10</span>Distribution</a>
+  <a href="#scale"><span class="i">11</span>Scale &amp; cost</a>
+  <a href="#risk"><span class="i">12</span>Risks</a>
+  <a href="#org"><span class="i">13</span>Ownership</a>
+  <a href="#kpi"><span class="i">14</span>Milestones &amp; KPIs</a>
+  <a href="#gaps"><span class="i">15</span>Not ready</a>
+  <a href="#next"><span class="i">16</span>Next five actions</a>
+  <div class="foot">
+    <span class="dot ok"></span>live<br>
+    <span class="dot info"></span>in flight<br>
+    <span class="dot warn"></span>spec ready<br>
+    <span class="dot bad"></span>not started
+  </div>
+</nav>
+
+<main>
+
+<header class="hero">
+  <div class="eyebrow">Public strategy &middot; 17 September 2026</div>
+  <h1>Rumours have no return address. <em>We give them one.</em></h1>
+  <p class="sub">This register does not decide what is true, and it is not in the truth business. It records <b>where a claim came from</b>: the first source we can find that put it into circulation, every source that repeated it afterwards, the licence it was published under, and the date we read it. Each record carries a cryptographic identity, so the trail can be checked by anyone and altered by no one &mdash; including us.</p>
+</header>
+
+<div class="strip">
+  <div><div class="k">Claims held</div><div class="v">1,465</div><div class="m">from 16 source domains</div></div>
+  <div><div class="k">Citable records</div><div class="v a">1,418</div><div class="m">content-addressed, after Phase 2</div></div>
+  <div><div class="k">Distinct assertions</div><div class="v">1,161</div><div class="m">64 of them corroborated today</div></div>
+  <div><div class="k">Page hashes today</div><div class="v b">207</div><div class="m">why origin is currently untraceable</div></div>
+</div>
+
+<section id="thesis">
+  <h2><span class="n">01</span>The thesis</h2>
+  <p class="lede">Every rumour, every statistic, every &ldquo;everyone knows&rdquo; on the web is a sentence that has been copied more often than it has been checked. Almost none of the copies say where it came from. So the question people actually ask &mdash; <em>who started this?</em> &mdash; has no answer, and blame for a false claim lands nowhere, or on whoever happened to repeat it last.</p>
+  <p>The register answers that question with a paper trail: one record per source, one identity per claim, one chain from the earliest known publication to every repetition after it. Three things follow, and they are the whole point of the project:</p>
+  <ul>
+    <li><strong>Origin is marked.</strong> A claim gets a return address: the first source in the register that published it, dated, with the bytes we read.</li>
+    <li><strong>Propagation is visible.</strong> Everyone who repeated it is listed in order, so copying is no longer indistinguishable from originating.</li>
+    <li><strong>The trail cannot be quietly rewritten.</strong> Content-addressed ids and signed release manifests mean the record of who said what, when, is verifiable offline &mdash; by a journalist, a regulator, or the source named in it.</li>
+  </ul>
+  <p>Truth is the source&rsquo;s business. Provenance is ours. And provenance is what makes accountability possible &mdash; you cannot pin a rumour on anyone if you cannot say where it entered circulation.</p>
+</section>
+
+<section id="why">
+  <h2><span class="n">02</span>Why it hurts everyone</h2>
+  <p>This is not a niche research problem. The absence of origin is a tax on every person who reads anything, and it lands hardest on the people with the least power to check.</p>
+  <div class="cards">
+    <div class="card"><div class="k">Anyone reading</div><div class="t">&ldquo;Everyone says&rdquo; is unfalsifiable</div>
+      <p>A claim with no source cannot be checked, only believed or dismissed. Whichever version gets repeated loudest and longest simply becomes the one in circulation.</p></div>
+    <div class="card"><div class="k">Whoever is targeted</div><div class="t">A rumour with no author cannot be answered</div>
+      <p>A person or business hit by a false claim has nothing to point at: no first publication, no chain of custody, no way to show the claim was copied rather than found.</p></div>
+    <div class="card"><div class="k">Whoever got it right</div><div class="t">The originator loses the credit</div>
+      <p>The body that did the work &mdash; the agency, the survey, the local reporter &mdash; is invisible once the number is loose, while the loudest repeater is treated as the authority.</p></div>
+    <div class="card"><div class="k">Whoever publishes</div><div class="t">Plagiarism is trivially easy</div>
+      <p>Copying a claim without its source is the default behaviour of the web, not the exception, because nothing makes the origin cheap to carry along.</p></div>
+    <div class="card"><div class="k">Anyone building with text</div><div class="t">Models launder rumour into fact</div>
+      <p>A false sentence repeated often enough becomes indistinguishable from a sourced one in a training corpus &mdash; and comes back out of the model with no citation at all.</p></div>
+    <div class="card"><div class="k">Institutions</div><div class="t">Nobody can evidence their own sourcing</div>
+      <p>Public bodies, courts, health services and newsrooms are increasingly asked to show where their facts came from. Doing that by hand, per case, is slow, expensive, and usually skipped.</p></div>
+  </div>
+  <div class="callout">
+    <div class="h">The blunt version</div>
+    <p>Misinformation has no accountability because it has no provenance &mdash; it is one problem, not two. You cannot blame the right source if you cannot find the first one. Marking origin is what turns an unfalsifiable rumour into a traceable publication: a thing with a date, an owner, and a record anybody can re-check.</p>
+  </div>
+  <p>And the fix has to be free and public, because the value only exists if everyone can consult it. A provenance register behind a paywall answers the question for the people who already had it answered.</p>
+</section>
+
+<section id="origin">
+  <h2><span class="n">03</span>Origin &amp; propagation &mdash; the core feature</h2>
+  <p>Two computed facts turn a pile of claims into a blame-capable register. Both come from the same identity layer, and both are stated as findings with evidence rather than as verdicts.</p>
+
+  <h3>1 &mdash; Origin: the earliest record we hold</h3>
+  <p>Every assertion (the claim itself, independent of who published it) collects all records that carry it, ordered by publication date. The earliest is the <strong>origin record</strong>: the first source in the register that put the claim into circulation, with its URL, its date, and the digest of the bytes we read. That is the return address.</p>
+  <div class="callout warn">
+    <div class="h">Stated honestly, on every page</div>
+    <p>&ldquo;First seen&rdquo; means <em>first seen by this register</em>. Our crawl begins in September 2026 and covers a defined, listed set of domains. An origin record is the earliest publication we can evidence &mdash; not a claim that nothing came earlier. Absence of an earlier record is evidence about <em>our coverage</em>, never proof about the world. The register publishes its coverage and date range so nobody mistakes the edge of the dataset for the edge of reality.</p>
+  </div>
+
+  <h3>2 &mdash; Propagation: everyone who repeated it, in order</h3>
+  <p>After the origin record, every dated record sharing the assertion id is a repetition: same claim, different publisher, later date. The register lists them in sequence, counts them, and shows the gaps &mdash; the claim that went from one government page to twenty sites in a month, or the one that never travelled at all.</p>
+  <table>
+    <thead><tr><th>Signal</th><th>What it tells you</th><th>Live today</th></tr></thead>
+    <tbody>
+      <tr><td>Origin record</td><td>Earliest publication of this claim in the register, with source and date</td><td class="num">derivable now, not yet surfaced</td></tr>
+      <tr><td>Record count</td><td>How many separate sources carry the claim</td><td class="num">up to 20 for one assertion</td></tr>
+      <tr><td>Corroborated assertions</td><td>Claims with more than one independent source</td><td class="num">64</td></tr>
+      <tr><td>Independent domains</td><td>Repetition across distinct publishers, not just pages</td><td class="num">computed at query time</td></tr>
+      <tr><td>Repetition interval</td><td>Time from origin to first repetition &mdash; how fast a claim travels</td><td class="num">new field, Phase 3</td></tr>
+      <tr><td>Chain of custody</td><td>Ordered list of every record, each with its own verifiable hash</td><td class="num">data present, view is Phase 3</td></tr>
+    </tbody>
+  </table>
+  <p>The propagation view is what makes the origin useful rather than merely interesting. &ldquo;This started here and was copied 19 times&rdquo; is a citable, checkable statement; &ldquo;this is misinformation&rdquo; is an opinion that invites a fight. We publish the first and refuse the second.</p>
+</section>
+
+<section id="product">
+  <h2><span class="n">04</span>The product</h2>
+  <p>Four surfaces, each useful alone, all fed from one row in one database:</p>
+  <div class="cards four">
+    <div class="card"><div class="k">Surface 1</div><div class="t">The index</div>
+      <p>Search and claim pages with an origin line, the propagation list and the licence. HTML for people, PROV-O JSON-LD or Turtle for machines, from the same URL.</p></div>
+    <div class="card"><div class="k">Surface 2</div><div class="t">The API</div>
+      <p>Keyless: claim lookup, search, domain stats, licence records, release manifests, and a verification endpoint returning an inclusion proof.</p></div>
+    <div class="card"><div class="k">Surface 3</div><div class="t">Badges &amp; stamps</div>
+      <p>A one-line embed stating origin and record count: <span class="num">origin: epa.ie &middot; 4 records</span>. Every badge is a durable citation of the register.</p></div>
+    <div class="card"><div class="k">Surface 4</div><div class="t">Releases</div>
+      <p>Signed nightly manifest, periodic full dumps, mirrors able to verify everything without trusting our server.</p></div>
+  </div>
+  <h4>Design principles</h4>
+  <ul>
+    <li><strong>No model in the extraction path.</strong> Rule-based, deterministic, auditable, zero per-page token cost. The same page yields the same record in a year.</li>
+    <li><strong>Point, do not rehost.</strong> Claim text, source URL, licence, date and fetch digest. Not page copies for redistribution.</li>
+    <li><strong>No personal data.</strong> Claims are statements about the world; anything person-shaped is excluded by rule.</li>
+    <li><strong>Nothing deleted, ever.</strong> Superseded records are marked and lineage kept, so a correction is itself part of the trail.</li>
+    <li><strong>No verdicts.</strong> The register reports publication, date and repetition. It never says &ldquo;false&rdquo;, &ldquo;misleading&rdquo; or &ldquo;disinformation&rdquo; about a source.</li>
+  </ul>
+</section>
+
+<section id="state">
+  <h2><span class="n">05</span>Where it stands</h2>
+  <table>
+    <thead><tr><th>Dimension</th><th>State at 17 Sep 2026</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr><td>Public site</td><td><span class="dot ok"></span>Live at <code>factprovenance.org</code>; all routes 200, dark full-bleed UI, favicon, content negotiation on claim URLs</td><td class="num">curl 200 on / and /claim/1</td></tr>
+      <tr><td>Register</td><td><span class="dot ok"></span>1,465 claims from 16 domains extracted from fetched pages</td><td class="num">count = 1465</td></tr>
+      <tr><td>Licence gate</td><td><span class="dot warn"></span>1,174 public / 291 withheld &mdash; only 21 withholdings are genuine licence exclusions; 270 are hostname bugs</td><td class="num">domain analysis</td></tr>
+      <tr><td>Claim identity</td><td><span class="dot bad"></span>Digest is per-page, not per-claim: 1,465 claims share 207 hashes</td><td class="num">distinct digest = 207</td></tr>
+      <tr><td>Origin view</td><td><span class="dot bad"></span>Data exists (dates + sources) but nothing surfaces an origin line or propagation list yet</td><td class="num">no route exists</td></tr>
+      <tr><td>Nightly growth</td><td><span class="dot ok"></span>Newest Common Crawl release auto-followed; page budget steps 60 &rarr; 400 per domain, +40 a night</td><td class="num">nightly, 03:00 UTC</td></tr>
+      <tr><td>Work in flight</td><td><span class="dot info"></span>Licence-gate rebuild + badge/stamp endpoints running on a build node</td><td class="num">build node, job service</td></tr>
+      <tr><td>Identity layer</td><td><span class="dot warn"></span>Specified and proven on live data; not yet deployed</td><td class="num">root sha256:d3c53ce1&hellip;</td></tr>
+    </tbody>
+  </table>
+  <div class="callout bad">
+    <div class="h">Known defect, found while specifying the crypto layer</div>
+    <p>The static export writes the digest with the algorithm prefix twice (<code>sha256:sha256:&hellip;</code>) while the API writes it once. The same field in two formats breaks naive consumers. Slated for the Phase 2 pass &mdash; exactly the kind of thing caught by re-deriving rather than trusting a report.</p>
+  </div>
+</section>
+
+<section id="arch">
+  <h2><span class="n">06</span>Architecture</h2>
+  <ol>
+    <li><strong>Acquire</strong> &mdash; newest Common Crawl release, filtered to an allow-list of domains, plus direct fetch of licence and evidence pages. Raw bytes kept, fetch digest recorded.</li>
+    <li><strong>Extract</strong> &mdash; deterministic rules pull candidate claims (figures, dates, superlatives, attributions) with surrounding context. No LLM: same input, same output, forever.</li>
+    <li><strong>Gate</strong> &mdash; licence resolver decides public or withheld per domain from a licence record with URL and date. Unknown licence is withheld, never guessed.</li>
+    <li><strong>Identify</strong> &mdash; assertion id (normalised text) and record id (assertion + canonical source) computed per row; page digest kept beside them as fetch evidence.</li>
+    <li><strong>Attribute</strong> &mdash; per assertion: earliest dated record = origin, all later records = propagation, counts and intervals computed. A query over the same rows, not a second dataset.</li>
+    <li><strong>Publish</strong> &mdash; server renders HTML, PROV-O, JSON-LD and Turtle from one row; badges render from the same id; the nightly build commits a signed manifest.</li>
+    <li><strong>Distribute</strong> &mdash; badges and embeds, dataset releases for mirrors, open API for tooling.</li>
+  </ol>
+  <table>
+    <thead><tr><th>Layer</th><th>Now</th><th>Next step</th></tr></thead>
+    <tbody>
+      <tr><td>Store</td><td>SQLite, single file, WAL</td><td>Postgres past roughly a million records or when writers contend; SQLite stays as the portable mirror</td></tr>
+      <tr><td>Serve</td><td>One Python service under systemd, a commercial DNS and TLS provider</td><td>Static export of claim pages to a CDN so reads never touch the origin</td></tr>
+      <tr><td>Crawl</td><td>Nightly cron, stepping budget</td><td>Per-domain concurrency, robots.txt honouring, backoff on 429</td></tr>
+      <tr><td>Identity</td><td>Page digest only</td><td>Assertion and record ids, Merkle manifest, Ed25519 signature (&sect;07)</td></tr>
+      <tr><td>Attribution</td><td>Data present, no view</td><td>Origin line, propagation list, repetition interval, chain-of-custody view</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="crypto">
+  <h2><span class="n">07</span>Cryptographic identity</h2>
+  <p>Origin attribution is worth nothing if the record of it can be edited afterwards. Today it can be: the digest hashes the whole page, so it identifies the page rather than the claim, every claim from one page shares one hash, and a refetch that changes a single byte orphans the lot. The fix is identity at two levels, both derived from content, so the identifier <em>is</em> the content.</p>
+  <table>
+    <thead><tr><th>Level</th><th>Hashed over</th><th>Answers</th><th>Live prototype</th></tr></thead>
+    <tbody>
+      <tr><td>Assertion <code>fp1-&hellip;</code></td><td>Normalised claim text only</td><td><em>What</em> is being claimed</td><td class="num">1,161 from 1,465 claims</td></tr>
+      <tr><td>Record <code>fp1-&hellip;</code></td><td>Assertion id + canonical URL + date + kind</td><td><em>Who</em> published it, <em>where</em></td><td class="num">1,418 records</td></tr>
+    </tbody>
+  </table>
+  <h4>Canonicalisation, versioned as fp1</h4>
+  <ul>
+    <li>Text: Unicode NFC, fold curly quotes and dashes, strip zero-width characters, collapse whitespace, trim.</li>
+    <li>URL: lowercase host, drop <code>www./www2./m.</code>, drop default port, strip tracking parameters, sort query, drop fragment.</li>
+    <li>Date: ISO-8601 UTC or empty. Field order fixed; each id space domain-separated by a literal prefix so the two can never collide.</li>
+    <li>Rules frozen per version. An id embedded in someone else&rsquo;s page must keep meaning the same thing; changing a rule means minting <code>fp2</code> and keeping a legacy map.</li>
+  </ul>
+  <h4>What the two levels buy</h4>
+  <p>Corroboration and origin stop being guesses: <strong>64 assertions appear in more than one place</strong>, the most-travelled appears as <strong>20 separate records</strong>, and the earliest of those is an origin with an owner and a date. A page-digest model cannot express any of it.</p>
+  <h4>Commitment and proof &mdash; verified, not proposed</h4>
+  <ul>
+    <li>Each release builds a <strong>Merkle tree</strong> over the record ids: root <code>sha256:d3c53ce1acf76b74&hellip;</code> over 1,418 leaves.</li>
+    <li>Any single record is provable with an <strong>11-hash inclusion proof</strong> (~352 bytes). Tested on 50 random records against the root, with forged records rejected, and small-tree tests passing at 1, 2, 3, 4, 5, 7, 8 and 9 leaves.</li>
+    <li><strong>Tamper-evident:</strong> changing one character of one claim changes the root.</li>
+    <li><strong>Append-only:</strong> each nightly manifest carries the previous manifest&rsquo;s hash, so history cannot be quietly rewritten.</li>
+    <li><strong>Attributable:</strong> the manifest is signed with an Ed25519 project key published at a fixed well-known path, with a key id so rotation is visible.</li>
+    <li><strong>Externally anchorable</strong> to a public timestamp service, giving &ldquo;this existed before date X&rdquo; from a clock we do not control.</li>
+  </ul>
+  <div class="callout">
+    <div class="h">What the signature does and does not prove</div>
+    <p>It proves the register recorded a claim, unchanged, at a point in time, and names the source. It does not prove the claim is true, does not prove we read the page correctly, and does not prove the named source intended any harm. That boundary is printed on every claim page, because a provenance register mistaken for a truth machine is worse than none.</p>
+  </div>
+</section>
+
+<section id="law">
+  <h2><span class="n">08</span>Blame, done responsibly</h2>
+  <p>Marking origin is the point of the project, and it is also the fastest way to build something that ruins innocent people&rsquo;s lives. A register that says &ldquo;this claim started here&rdquo; is one careless design decision away from being a machine for accusing whoever is named first. These rules are part of the product, not a policy bolted on afterwards.</p>
+  <div class="cards">
+    <div class="card"><div class="k">Rule 1</div><div class="t">We mark publication, never intent</div>
+      <p>The register states who published a claim and when. It never characterises a source as a liar, a spreader or a culprit, and never uses the word disinformation about anyone.</p></div>
+    <div class="card"><div class="k">Rule 2</div><div class="t">A repeater is not an author</div>
+      <p>A source that repeated a claim may have been quoting it, reporting on it, or debunking it. The propagation list shows sequence, and says plainly that sequence is not authorship.</p></div>
+    <div class="card"><div class="k">Rule 3</div><div class="t">Coverage is published, so first-seen is never overstated</div>
+      <p>Every origin line carries the date range and domain list it was drawn from. The reader sees the edge of the dataset and judges the claim accordingly.</p></div>
+    <div class="card"><div class="k">Rule 4</div><div class="t">Right of reply, on the record</div>
+      <p>Any source named as an origin can respond. The response is stored, published alongside the record, and covered by the same identity and signing treatment.</p></div>
+    <div class="card"><div class="k">Rule 5</div><div class="t">Corrections are appended</div>
+      <p>A wrong origin is corrected in public and the old record stays visible with its lineage, because a register that hides its own mistakes cannot be trusted with anyone else&rsquo;s.</p></div>
+    <div class="card"><div class="k">Rule 6</div><div class="t">Opt-out is one line, honoured nightly</div>
+      <p>A domain owner can withdraw; the build drops the records and the manifest records the withdrawal. Public accountability does not require anyone&rsquo;s participation by force.</p></div>
+  </div>
+  <p>None of this weakens the project. It is what makes the output citable by journalists and defensible in a lawyer&rsquo;s office &mdash; which is exactly where a provenance tool has to survive if it is going to hold anyone accountable at all.</p>
+</section>
+
+<section id="licence">
+  <h2><span class="n">09</span>Licensing &amp; legal posture</h2>
+  <p>Public builds draw only on sources with a documented public licence: Wikipedia (CC BY-SA), Irish public sector (eGov/OGL), US federal (.gov, public domain), EU institutions (CC BY 4.0), plus named CC BY 4.0 publishers. News domains stay out of the public build entirely until explicitly cleared &mdash; the exposure there is real and the value is not worth it.</p>
+  <table>
+    <thead><tr><th>Bucket</th><th>Count</th><th>Reading</th></tr></thead>
+    <tbody>
+      <tr><td>Withheld &mdash; genuine licence exclusion</td><td class="num">21</td><td>Two news domains, all rights reserved. Correctly excluded.</td></tr>
+      <tr><td>Withheld &mdash; hostname bug</td><td class="num">270</td><td>Openly licensed sources (<code>ourworldindata.org</code> 226, <code>hse.ie</code> 34, Teagasc 10) wrongly caught by a hand-kept host list. Fixing the gate releases them.</td></tr>
+    </tbody>
+  </table>
+  <ul>
+    <li><strong>Attribution is enforced by the schema.</strong> Where a licence requires attribution or share-alike, the record carries the licence identifier and the attribution string; the public build refuses records whose attribution cannot be stated.</li>
+    <li><strong>Our own metadata is released permissively</strong> &mdash; identifiers, URLs, licences, hashes, manifests, origin and propagation data &mdash; so mirrors and tooling have no friction. Claim text inherits its source&rsquo;s licence and is marked as such.</li>
+    <li><strong>Defamation and database rights reviewed before origin claims go public at scale.</strong> Naming an origin is a factual statement and we can evidence it; the page language, the reply mechanism and the coverage caveat keep it in the realm of fact rather than accusation.</li>
+    <li><strong>No personal data.</strong> Claims are statements about the world, not about people. Anything person-shaped is excluded by rule and audited.</li>
+  </ul>
+</section>
+
+<section id="dist">
+  <h2><span class="n">10</span>Distribution &amp; growth</h2>
+  <ul>
+    <li><strong>Badges first.</strong> A one-line embed carrying the origin and the record count, linking back. Every badge is a durable citation of the register and a crawlable link. This is the growth engine; the API is the product for machines.</li>
+    <li><strong>Dataset releases.</strong> Signed nightly manifests plus periodic full dumps, so mirrors, researchers and model builders consume without hammering the origin.</li>
+    <li><strong>Origin checking for tooling.</strong> A small helper: given a passage, return the matching assertion, its origin record, its propagation list and its licence. This is the bridge from the register into retrieval and model pipelines &mdash; the natural place to fix rumour laundering at the source.</li>
+    <li><strong>Reference ecosystems.</strong> Wikidata, open-data portals, academic libraries, data-journalism toolkits and fact-checking organisations are the natural places to be listed, cited and forked. Fact-checkers get the origin chain they currently assemble by hand.</li>
+    <li><strong>Discoverability.</strong> Public claim pages, sitemap, open licence, and a dataset identifier so the register can be cited academically.</li>
+  </ul>
+  <p><strong>What we do not chase:</strong> no paid tier, no rate-limit business model, no news corpus, no truth verdicts. The register&rsquo;s value rises with the number of independent users and mirrors, and both collapse the moment access is gated or the output becomes a judgement call.</p>
+</section>
+
+<section id="scale">
+  <h2><span class="n">11</span>Scale &amp; cost</h2>
+  <table>
+    <thead><tr><th>Stage</th><th>Register size</th><th>Store</th><th>Monthly</th><th>Gate to pass</th></tr></thead>
+    <tbody>
+      <tr><td>Now</td><td class="num">1.5k claims, 16 domains</td><td>SQLite, one instance</td><td class="num">$12</td><td>Licence gate correct; badges live</td></tr>
+      <tr><td>Next</td><td class="num">50k&ndash;100k claims, 100&ndash;300 domains</td><td>SQLite + static export to CDN</td><td class="num">$12&ndash;24</td><td>Identity and origin shipped; crawl polite and resumable</td></tr>
+      <tr><td>Then</td><td class="num">1M claims, ~1k domains</td><td>Postgres + object storage for raw bytes</td><td class="num">$40&ndash;80</td><td>Serving cost per request near zero; origin computed per assertion at build time</td></tr>
+      <tr><td>Further</td><td class="num">10M+ claims</td><td>Postgres + columnar exports; batch work on spare capacity</td><td class="num">metered</td><td>Mirrors take real read traffic; the origin is an origin again</td></tr>
+    </tbody>
+  </table>
+  <p>Extraction is rule-based, so cost scales with bytes fetched rather than tokens, and the origin and propagation views are queries over rows we already hold. The dominant long-run cost is storage and bandwidth, and both fall once claim pages are exported statically.</p>
+</section>
+
+<section id="risk">
+  <h2><span class="n">12</span>Risks</h2>
+  <table>
+    <thead><tr><th>Risk</th><th>Severity</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr><td>A named origin claims defamation, or suffers harassment because of the register</td><td><span class="dot bad"></span>High</td><td>&sect;08 rules: publication not intent, coverage published, right of reply on the record, corrections appended, opt-out honoured nightly, no verdict language anywhere in the UI</td></tr>
+      <tr><td>First-seen is read as &ldquo;the origin of the rumour&rdquo; when it is only our earliest record</td><td><span class="dot bad"></span>High</td><td>Every origin line carries the dataset&rsquo;s date range and domain coverage; the caveat sits on the page, not in a footnote</td></tr>
+      <tr><td>Copyright or database-rights challenge</td><td><span class="dot bad"></span>High</td><td>Licence allow-list only; point-don&rsquo;t-rehost; per-domain opt-out; news excluded from public builds</td></tr>
+      <tr><td>A wrong attribution damages trust more than an empty register</td><td><span class="dot warn"></span>Medium</td><td>Deterministic extraction, evidence URL and fetch digest on every record, corrections appended with lineage, independent re-derivation of every landed change</td></tr>
+      <tr><td>Silent canonicalisation change breaks ids embedded in other people&rsquo;s pages</td><td><span class="dot warn"></span>Medium</td><td>Frozen versioned rules; a new version mints new ids and keeps a legacy map so old URLs resolve</td></tr>
+      <tr><td>Register used as a weapon against a source that merely repeated a claim</td><td><span class="dot warn"></span>Medium</td><td>Propagation list states sequence, never authorship; no ranking of sources by &ldquo;spread&rdquo;; no API field that reads as a score</td></tr>
+      <tr><td>Single-maintainer bus factor</td><td><span class="dot warn"></span>Medium</td><td>Open licence, documented pipeline, signed manifests and mirrors so the register survives us</td></tr>
+      <tr><td>Crawl blocks or rate limits</td><td><span class="dot info"></span>Low</td><td>robots.txt honoured, backoff, per-domain politeness, cached raw fetches; a blocked domain is skipped, not worked around</td></tr>
+      <tr><td>Hosting or DNS takedown</td><td><span class="dot info"></span>Low</td><td>Static export and signed dumps: anyone can stand the register back up from a mirror and verify it</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="org">
+  <h2><span class="n">13</span>Ownership &amp; governance</h2>
+  <ul>
+    <li><strong>Neutral project, not a company asset.</strong> Its own name and domain, with a plain &ldquo;built by&rdquo; line to the originating studio. Credibility with libraries, newsrooms and public bodies depends on that separation.</li>
+    <li><strong>One append-only decision log.</strong> Licence policy, id version, key rotation, opt-outs and corrections are recorded with their evidence, so a future maintainer sees why as well as what.</li>
+    <li><strong>Key custody.</strong> The signing key stays with the project owner; the public key is published; rotation is announced inside the manifest chain so it can never be mistaken for tampering.</li>
+    <li><strong>Roles.</strong> One primary maintainer, with workstreams farmed out and every landed change independently re-derived by someone other than whoever built it. Self-reports are not evidence; claims are recomputed on the box.</li>
+  </ul>
+</section>
+
+<section id="kpi">
+  <h2><span class="n">14</span>Milestones &amp; KPIs</h2>
+  <div class="phase">
+    <div class="when">Phase 0<br><span class="st" style="color:#3fb950">done &middot; 16 Sep</span></div>
+    <div class="what"><h3>Stand it up</h3><p>Domain, DNS, hosting, nightly crawl, licence gate v1, UI with content negotiation. Delivered: live site, 1,465 claims, 16 domains.</p></div>
+  </div>
+  <div class="phase">
+    <div class="when">Phase 1<br><span class="st" style="color:#4a84fe">in flight &middot; 17&ndash;18 Sep</span></div>
+    <div class="what"><h3>Trustworthy corpus, and embeddable</h3><p>Rebuild the licence gate from licence records &mdash; kills the 270 false withholdings and takes the public set to roughly 1,444 &mdash; and ship badges, stamps, embeds and the verification endpoint. Exit gate: independent recount per domain, both SVGs parsed as XML, every new route returning exact content types, three licence evidence URLs spot-checked by hand.</p></div>
+  </div>
+  <div class="phase">
+    <div class="when">Phase 2<br><span class="st" style="color:#d29922">spec ready &middot; 18&ndash;20 Sep</span></div>
+    <div class="what"><h3>Cryptographic identity</h3><p>Assertion and record ids into the pipeline, legacy id map so existing URLs keep resolving, Merkle root per release, signed manifest chain, external anchor, proof in the verification endpoint. Exit gate: proofs recomputed independently on the box, a forged record rejected, one character changed flips the root, old claim URLs still resolve.</p></div>
+  </div>
+  <div class="phase">
+    <div class="when">Phase 3<br><span class="st" style="color:#8b949e">then &middot; week of 21 Sep</span></div>
+    <div class="what"><h3>Origin &amp; propagation views &mdash; the point of the project</h3><p>Origin line on every claim page (earliest dated record, with coverage stated), propagation list in date order, repetition interval, chain-of-custody view with a verifiable hash per step, and the origin fields in the API and on the badge. This phase is what makes the register accountable rather than merely interesting.</p></div>
+  </div>
+  <div class="phase">
+    <div class="when">Phase 4<br><span class="st" style="color:#8b949e">October</span></div>
+    <div class="what"><h3>Scale and standing</h3><p>Hundreds of domains and tens of thousands of claims, politeness and resumability, first signed public dataset dump with a citation identifier, first mirror, first badge in the wild, and a legal review of the origin language before it is promoted.</p></div>
+  </div>
+  <h3>KPIs we will report</h3>
+  <table>
+    <thead><tr><th>Metric</th><th>Now</th><th>Target</th></tr></thead>
+    <tbody>
+      <tr><td>Public claims</td><td class="num">1,174</td><td class="num">~1,444 after Phase 1</td></tr>
+      <tr><td>Assertions with a computed origin record</td><td class="num">0 surfaced</td><td class="num">100% after Phase 3</td></tr>
+      <tr><td>Corroborated assertions (more than one source)</td><td class="num">64</td><td class="num">reported per release as coverage grows</td></tr>
+      <tr><td>Assertions travelling across independent domains</td><td class="num">not yet measured</td><td class="num">measured and published each release</td></tr>
+      <tr><td>Claims with a per-claim cryptographic identity</td><td class="num">0</td><td class="num">100% after Phase 2</td></tr>
+      <tr><td>Domains with a licence record and evidence URL</td><td class="num">16 identified</td><td class="num">100% of public sources</td></tr>
+      <tr><td>Third-party badges live</td><td class="num">0</td><td class="num">first external embed within two weeks of Phase 1</td></tr>
+      <tr><td>Independent verification of a release by an outsider</td><td class="num">0</td><td class="num">first one after the first public dump</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="gaps">
+  <h2><span class="n">15</span>What is not ready</h2>
+  <ul>
+    <li><strong>Origin and propagation are visible nowhere.</strong> The dates and sources needed to compute them are in the register, but no page or badge shows an origin line or a repetition list. Today the register cannot answer the question the project exists to answer.</li>
+    <li><strong>Coverage is thin and narrow.</strong> 16 domains, mostly Irish and European, crawled from September 2026. &ldquo;First seen&rdquo; therefore means first seen by us, in a small window &mdash; the &sect;03 caveat is load-bearing until the corpus is much wider.</li>
+    <li><strong>The licence gate is wrong for 270 records</strong> &mdash; withheld though openly licensed. Until Phase 1 lands the public register understates the corpus by roughly 20%.</li>
+    <li><strong>No badge or stamp route is live.</strong> The endpoints are being built now; there is no embed surface at all today.</li>
+    <li><strong>Per-claim identity does not exist in production.</strong> The two-level scheme and Merkle commitment are proven on the real data, but the pipeline still stores page digests, and one export path double-prefixes the digest field.</li>
+    <li><strong>Nothing is signed and nothing is anchored.</strong> No published key, so today&rsquo;s releases cannot be independently verified.</li>
+    <li><strong>No right-of-reply or opt-out mechanism exists yet.</strong> &sect;08 is a specification, not a shipped feature, and must ship with &mdash; or before &mdash; the first public origin claim.</li>
+    <li><strong>No legal review of origin language at scale.</strong> Naming a first publisher is a factual, evidenced statement; the wording and the reply path still need sign-off before promotion.</li>
+    <li><strong>No public dataset dump, no citation identifier, no mirror</strong> &mdash; nothing yet survives the origin going away.</li>
+    <li><strong>Scale path untested.</strong> SQLite on a single instance is fine at 1.5k claims and unproven past a few hundred thousand.</li>
+  </ul>
+</section>
+
+<section id="next">
+  <h2><span class="n">16</span>Next five actions</h2>
+  <table>
+    <thead><tr><th>#</th><th>Action</th><th>Owner</th><th>State</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1</td><td>Licence-gated rebuild: licence records per domain, gate by licence rather than host list, release the 270 false withholdings</td><td>build node</td><td><span class="dot info"></span>running</td></tr>
+      <tr><td class="num">2</td><td>Badge, stamp, embed and verification endpoints, with the badge block on claim pages</td><td>build node</td><td><span class="dot info"></span>running</td></tr>
+      <tr><td class="num">3</td><td>Independent verification of both by the primary maintainer: recount on the box, SVGs parsed, every route curled, licence evidence spot-checked</td><td>primary maintainer</td><td><span class="dot warn"></span>pending landing</td></tr>
+      <tr><td class="num">4</td><td>Cryptographic identity workstream: two-level ids, legacy map, Merkle manifest, signing key, anchor, verification proof &mdash; spec written, tested reference implementation ready</td><td>spec ready</td><td><span class="dot warn"></span>awaiting go</td></tr>
+      <tr><td class="num">5</td><td>Origin &amp; propagation: origin line, ordered chain of custody, repetition interval, origin fields in API and badge; right-of-reply and opt-out before the first public origin claim</td><td>primary maintainer</td><td><span class="dot bad"></span>not started</td></tr>
+    </tbody>
+  </table>
+  <blockquote>The register is only useful if it outlives us and can be checked without us &mdash; and it is only responsible if it names where a claim came from without ever pretending to name who is guilty.</blockquote>
+</section>
+
+<footer>
+  <strong style="color:#8b949e">Fact Provenance &middot; strategic plan v1.1 &middot; external &middot; 17 September 2026</strong><br>
+  External version &middot; the public copy, published at factprovenance.org. Figures were read from the live register on 17 Sep 2026: 1,465 claims, 16 domains, 1,174 public / 291 withheld, 207 distinct page digests, 1,161 assertions and 1,418 records under the proposed identity scheme, Merkle root <span class="num">sha256:d3c53ce1acf76b74&hellip;</span> verified with 11-hash inclusion proofs, 64 corroborated assertions, largest group 20 records. Public site: factprovenance.org
+</footer>
+
+</main>
+</div>
+
+<script>
+// Highlight the section currently in view — quiet, no motion budget.
+(() => {
+  const links = [...document.querySelectorAll('nav.side a[href^="#"]')];
+  const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+  const obs = new IntersectionObserver(es => {
+    es.forEach(e => {
+      const a = map.get(e.target.id);
+      if (a && e.isIntersecting) {
+        links.forEach(l => l.classList.remove('on'));
+        a.classList.add('on');
+      }
+    });
+  }, { rootMargin: '-52px 0px -70% 0px', threshold: 0 });
+  document.querySelectorAll('section[id]').forEach(s => obs.observe(s));
+})();
+</script>
+</body>
+</html>

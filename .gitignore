@@ -1,0 +1,10 @@
+# local state and build artefacts — never published
+*.db
+*.db-wal
+*.db-shm
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.log
+evidence/

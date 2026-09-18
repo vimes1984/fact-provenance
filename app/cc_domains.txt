@@ -1,0 +1,25 @@
+# Common Crawl mine list — PUBLIC-DUMP-SAFE licences only:
+#   Wikipedia (CC BY-SA, attribution), Irish gov/eGov (OGL), UK OGL, US .gov (public domain),
+#   EU (CC BY 4.0). News domains (rte.ie, irishtimes, guardian, bbc) stay OUT of the public
+#   build until the licence story is settled — they'd go in the private/paid index only.
+# Rail shape, same as the lead-gen miners: CC index -> WARC range fetch -> claim extract.
+en.wikipedia.org
+simple.wikipedia.org
+ie.wikipedia.org
+www.cso.ie
+www.gov.ie
+www.epa.ie
+www.met.ie
+www.teagasc.ie
+www.hse.ie
+data.gov.ie
+ec.europa.eu
+www.eurostat.ec.europa.eu
+www.ons.gov.uk
+www.parliament.uk
+www.nasa.gov
+www.noaa.gov
+www.usgs.gov
+www.nih.gov
+www.cdc.gov
+www.un.org

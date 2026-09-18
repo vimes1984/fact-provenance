@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="An open index of factual claims and where they came from — searchable, licence-gated, published as W3C PROV-O linked data.">
+<link rel="canonical" href="https://factprovenance.org/">
+<meta property="og:title" content="Fact Provenance — claim index">
+<meta property="og:description" content="Search indexed factual claims with their provenance, published as open PROV-O data.">
+<meta property="og:url" content="https://factprovenance.org/">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0d1117">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230d1117'/%3E%3Cpath d='M18 34l10 10 20-24' stroke='%234a84fe' stroke-width='6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<title>Fact Provenance — claim index</title>
+<style>
+  /* Palette: Hermes desktop "nous" dark (apps/shared/theme-presets.ts).
+     Canvas #0d1117, sunken card #010409, raised #161b22, ink #e6edf3,
+     dim #7d8590, Nous blue #4a84fe. Hairlines are the same idea as the app's
+     #30363d border, but mixed down to ~9% so every rule reads a lot thinner. */
+  :root{
+    color-scheme:dark;
+    --bg:#0d1117; --card:#010409; --raise:#161b22;
+    --ink:#e6edf3; --dim:#7d8590; --dimmer:#5a6371;
+    --accent:#4a84fe;
+    --line:rgba(240,246,252,.10);   /* primary hairline */
+    --line-2:rgba(240,246,252,.055); /* secondary hairline */
+    --ok:#3fb950; --warn:#d29922; --bad:#f85149;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","Cascadia Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box; border-radius:0 !important; box-shadow:none !important}
+  html,body{margin:0}
+  body{background:var(--bg); color:var(--ink); font:400 15px/1.55 var(--sans);
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility}
+  h1,h2,h3,h4{font-family:var(--sans); font-weight:500; margin:0; letter-spacing:-.011em}
+  a{color:var(--accent); text-decoration:none; border-bottom:1px solid rgba(74,132,254,.32)}
+  a:hover{border-bottom-color:var(--accent)}
+  header{border-bottom:1px solid var(--line); padding:20px 28px 16px; position:sticky; top:0;
+    background:rgba(13,17,23,.88); backdrop-filter:blur(8px); z-index:5}
+  .wrap{max-width:none; margin:0; padding:0 28px}
+  .brand{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
+  .brand h1{font-size:22px; letter-spacing:-.02em}
+  .brand .dot{width:7px;height:7px;background:var(--accent);display:inline-block}
+  .sub{color:var(--dim); font-size:13px; margin-top:5px}
+  .stats{display:flex; gap:24px; flex-wrap:wrap; margin-top:14px;
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--dim)}
+  .stats b{display:block; font-size:17px; color:var(--ink); font-weight:500; letter-spacing:0;
+    text-transform:none; margin-top:2px}
+  main{padding:24px 0 70px}
+  form.search{display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end}
+  label.fld{display:block; font-family:var(--mono); font-size:10.5px; text-transform:uppercase;
+    letter-spacing:.09em; color:var(--dim); margin-bottom:6px}
+  input[type=search],select{font:400 14.5px var(--sans); color:var(--ink); background:var(--card);
+    border:1px solid var(--line); padding:11px 12px; min-height:42px}
+  input[type=search]{flex:1 1 380px}
+  input[type=search]::placeholder{color:var(--dimmer)}
+  select{appearance:none; padding-right:30px;
+    background-image:linear-gradient(45deg,transparent 50%,var(--dim) 50%),
+                     linear-gradient(135deg,var(--dim) 50%,transparent 50%);
+    background-position:calc(100% - 17px) 50%,calc(100% - 12px) 50%;
+    background-size:5px 5px,5px 5px; background-repeat:no-repeat}
+  button{font:500 14px var(--sans); min-height:42px; padding:11px 20px;
+    border:1px solid var(--accent); background:var(--accent); color:#0d1117; cursor:pointer}
+  button:hover{filter:brightness(1.07)}
+  button.ghost{background:transparent; color:var(--ink); border-color:var(--line)}
+  button.ghost:hover{border-color:rgba(240,246,252,.24)}
+  button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{
+    outline:1px solid var(--accent); outline-offset:2px}
+  .kinds{display:flex; gap:6px; flex-wrap:wrap; margin:18px 0 4px}
+  .kind{font-family:var(--mono); font-size:11.5px; letter-spacing:.04em; border:1px solid var(--line);
+    background:transparent; padding:6px 10px; cursor:pointer; color:var(--dim); min-height:32px}
+  .kind:hover{color:var(--ink); border-color:rgba(240,246,252,.22)}
+  .kind[aria-pressed=true]{border-color:rgba(74,132,254,.55); color:var(--accent)}
+  .count{font-family:var(--mono); font-size:11.5px; letter-spacing:.03em; color:var(--dim);
+    margin:18px 0 8px; padding-bottom:8px; border-bottom:1px solid var(--line-2)}
+  article{background:var(--card); border:1px solid var(--line-2); border-left:1px solid var(--line);
+    padding:14px 16px; margin-bottom:8px}
+  article:hover{border-color:var(--line)}
+  article .claim{font-size:15.5px; line-height:1.5}
+  mark{background:transparent; border-bottom:1px solid var(--accent); padding-bottom:0}
+  .meta{display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:10px;
+    font-family:var(--mono); font-size:11.5px; color:var(--dim)}
+  .tag{border:1px solid var(--line); padding:2px 6px; font-size:11px}
+  .sdot{width:6px;height:6px;display:inline-block;margin-right:5px}
+  .s-unv{background:var(--warn)} .s-ver{background:var(--ok)} .s-con{background:var(--bad)}
+  .cited{margin-top:9px; padding-top:9px; border-top:1px solid var(--line-2);
+    font-size:12.5px; color:var(--dim)}
+  details{margin-top:9px}
+  summary{cursor:pointer; font-family:var(--mono); font-size:12.5px; color:var(--dim);
+    min-height:30px; display:flex; align-items:center}
+  summary:hover{color:var(--ink)}
+  pre{background:var(--card); border:1px solid var(--line-2); padding:12px; overflow:auto;
+    font-family:var(--mono); font-size:11.5px; line-height:1.5; max-height:340px;
+    margin:8px 0 0; color:#c9d1d9}
+  code{font-family:var(--mono); font-size:.92em; color:#c9d1d9; background:var(--card);
+    border:1px solid var(--line-2); padding:1px 4px}
+  .empty{border:1px dashed var(--line); padding:24px; color:var(--dim); font-size:14px}
+  footer{border-top:1px solid var(--line); padding:16px 28px; color:var(--dim);
+    font-size:12px; font-family:var(--mono)}
+  .warnline{border-left:1px solid var(--warn); padding:9px 14px; background:transparent;
+    font-size:13px; color:var(--dim); margin:16px 0}
+  ::selection{background:rgba(74,132,254,.30)}
+  *{scrollbar-width:thin; scrollbar-color:rgba(240,246,252,.18) transparent}
+@media (max-width:700px){
+  .wrap,header,footer{padding-left:16px;padding-right:16px}
+  .stats{gap:14px 20px}
+}</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span><h1>Fact Provenance</h1>
+      <span class="sub" style="margin:0">search where claims came from</span></div>
+    <div class="stats" id="stats"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <form class="search" id="f" role="search">
+    <div style="flex:1 1 380px">
+      <label class="fld" for="q">Claim text</label>
+      <input type="search" id="q" name="q" placeholder="e.g. emissions fell 7%, population 5.1 million, according to the EPA" autofocus>
+    </div>
+    <div>
+      <label class="fld" for="domain">Source domain</label>
+      <select id="domain"><option value="">all</option></select>
+    </div>
+    <button type="submit">Search</button>
+    <button type="button" class="ghost" id="reset">Reset</button>
+  </form>
+
+  <div class="kinds" id="kinds"></div>
+  <div class="warnline"><span class="sdot s-unv"></span><b>Unverified</b> — every record here is
+    indexed from a published page. &ldquo;Cited source&rdquo; is the pointer the page itself published;
+    the quote has not yet been matched against it. Nothing in this index claims a fact is <i>true</i>.</div>
+  <div class="count" id="count"></div>
+  <div id="results"></div>
+</main>
+
+<footer><div class="wrap">Prototype index · PROV-O / JSON-LD records served at <code>/api/claim/&lt;id&gt;</code> · open the record on any result</div></footer>
+
+<script>
+const KINDS = ["quantity","measure","dateclaim","attrib","superl"];
+const KIND_LABEL = {quantity:"quantity", measure:"measurement", dateclaim:"dated", attrib:"attributed", superl:"superlative"};
+let kindFilter = "";
+
+const esc = s => (s||"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function mark(text, q){
+  let h = esc(text);
+  const terms = (q||"").split(/\s+/).filter(t => t.length > 2).map(t => t.replace(/[^\w-]/g,""));
+  terms.forEach(t => { h = h.replace(new RegExp("(" + t + ")", "gi"), "<mark>$1</mark>"); });
+  return h;
+}
+
+async function loadStats(){
+  const s = await (await fetch("/api/stats")).json();
+  document.getElementById("stats").innerHTML = [
+    ["claims indexed", s.claims], ["source domains", s.domains],
+    ["pages", s.pages_ok], ["with a cited source", s.with_cited_source]
+  ].map(([k,v]) => `<div>${k}<b>${(v??0).toLocaleString()}</b></div>`).join("");
+  const sel = document.getElementById("domain");
+  const d = await (await fetch("/api/domains")).json();
+  sel.innerHTML = '<option value="">all</option>' + d.domains.map(x =>
+    `<option value="${esc(x.domain)}">${esc(x.domain)} (${x.claims})</option>`).join("");
+  document.getElementById("kinds").innerHTML = KINDS.map(k =>
+    `<button type="button" class="kind" data-k="${k}" aria-pressed="false">${KIND_LABEL[k]}</button>`).join("");
+  document.querySelectorAll(".kind").forEach(b => b.onclick = () => {
+    kindFilter = (kindFilter === b.dataset.k) ? "" : b.dataset.k;
+    document.querySelectorAll(".kind").forEach(x => x.setAttribute("aria-pressed", x.dataset.k === kindFilter));
+    run();
+  });
+}
+
+async function run(){
+  const q = document.getElementById("q").value.trim();
+  const domain = document.getElementById("domain").value;
+  const url = `/api/search?q=${encodeURIComponent(q)}&kind=${kindFilter}&domain=${encodeURIComponent(domain)}&limit=40`;
+  const r = await (await fetch(url)).json();
+  document.getElementById("count").textContent =
+    `${r.total.toLocaleString()} claim${r.total === 1 ? "" : "s"} match` + (q ? ` for “${q}”` : "");
+  const out = document.getElementById("results");
+  if (!r.results.length){ out.innerHTML = `<div class="empty">No claims match. Try a single distinctive word, or clear the filters.</div>`; return; }
+  out.innerHTML = r.results.map(x => `
+    <article>
+      <div class="claim">${mark(x.text, q)}</div>
+      <div class="meta">
+        <span class="tag"><span class="sdot s-unv"></span>unverified</span>
+        ${(x.kind||"").split(",").filter(Boolean).map(k => `<span class="tag">${esc(KIND_LABEL[k]||k)}</span>`).join("")}
+        <span>${esc(x.domain)}</span>
+        ${x.pubdate ? `<span>${esc(x.pubdate)}</span>` : ""}
+        <a href="${esc(x.url)}" target="_blank" rel="noopener">source page</a>
+      </div>
+      ${x.cited_url ? `<div class="cited">This page cites → <a href="${esc(x.cited_url)}" target="_blank" rel="noopener">${esc(x.cited_url)}</a></div>` : ""}
+      <details><summary>PROV-O record</summary><pre data-prov="${x.id}">loading…</pre></details>
+    </article>`).join("");
+  out.querySelectorAll("details").forEach(d => d.ontoggle = async () => {
+    if (!d.open) return;
+    const pre = d.querySelector("pre");
+    if (pre.dataset.done) return;
+    const id = pre.dataset.prov;
+    pre.textContent = JSON.stringify(await (await fetch(`/api/claim/${id}`)).json(), null, 2);
+    pre.dataset.done = "1";
+  });
+}
+
+document.getElementById("f").onsubmit = e => { e.preventDefault(); run(); };
+document.getElementById("reset").onclick = () => {
+  document.getElementById("q").value = ""; document.getElementById("domain").value = "";
+  kindFilter = ""; document.querySelectorAll(".kind").forEach(x => x.setAttribute("aria-pressed","false"));
+  run();
+};
+loadStats().then(run);
+</script>
+</body>
+</html>
