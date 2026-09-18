@@ -35,17 +35,14 @@ import pathlib
 import subprocess
 import sys
 
-MARKERS = [
-    ".207",                     # private LAN host, internal fleet
-    "fleet node",               # internal fleet vocabulary
-    "fp-job",                   # internal job name
-    "primary agent",            # internal role name
-    "192.168.",                 # RFC1918 private LAN
-    "63.35.224.96",             # public address of a private host
+_GENERIC = [
+    # Markers that are safe to publish: they describe the build split itself,
+    # not our hosts, addresses or people.
     'id="internal"',            # marker attribute of the internal plan build
     "stratplan-internal.html",  # filename of the internal plan build
-    # added after a real miss: the published plan carried the internal build's
-    # own scope label and infra paths, and this guard still said PASS
+    # Added after a real miss: the published plan carried the internal build's
+    # own scope label, an /opt path and a provider name, and this guard still
+    # said PASS. The defect was the marker list, not the file.
     "LAN only",
     "internal &middot; LAN only",
     "Internal annex",
@@ -55,11 +52,27 @@ MARKERS = [
     "/srv/",
     "Cloudflare",
     "Lightsail",
-    "Rennwick",
-    "rennwick",
-    "Churchill",
 ]
 
+_LOCAL_FILE = pathlib.Path(__file__).resolve().parent / "pii-markers.local"
+
+
+def _local_markers() -> list[str]:
+    """Private markers, kept out of the published file.
+
+    This guard has to name what it looks for, so anything sensitive goes in a
+    gitignored sidecar: the rig's gate still catches our host ids, LAN range and
+    owner name, while the public copy of this file names nothing about us.
+    """
+    try:
+        text = _LOCAL_FILE.read_text(encoding="utf-8")
+    except OSError:
+        return []
+    return [line.strip() for line in text.splitlines()
+            if line.strip() and not line.startswith("#")]
+
+
+MARKERS = _GENERIC + _local_markers()
 SELF = pathlib.Path(__file__).resolve()
 IGNORE_DIRS = {".git", "__pycache__", ".venv", "venv", "evidence", "node_modules"}
 
